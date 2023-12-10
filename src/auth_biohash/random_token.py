@@ -10,6 +10,7 @@ def generate_token(size: int = 256) -> str:
     Helper function to generate a secure random token to be used as the basis for
     matrix generations.
 
+    :param size: The size of the generated token.
     :return: the generated token.
     """
     return secrets.token_hex(size)
