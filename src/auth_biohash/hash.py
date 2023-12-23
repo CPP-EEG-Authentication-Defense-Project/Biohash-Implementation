@@ -7,36 +7,31 @@ from . import random_token, exceptions, binary_encoding
 QuantizationStep = typing.Callable[[np.ndarray], np.ndarray]
 
 
-class BioHash:
+class BioHashPipeline:
     """
-    Core BioHash class representing a single hash instance.
+    A pipeline used for building BioHash representations of feature data.
     """
-    def __init__(self, content: str):
-        self.content = content
+    def __init__(self,
+                 token: typing.Union[int, float, str],
+                 encoder: binary_encoding.BinaryEncoder,
+                 quantization_steps: typing.List[QuantizationStep] = None):
+        self._matrix_generator = random_token.MatrixGenerator(token)
+        self.encoder = encoder
+        self.quantization_steps = quantization_steps or []
 
-    @classmethod
-    def generate_hash(cls,
-                      token: str,
-                      features: np.ndarray,
-                      encoder: binary_encoding.BinaryEncoder,
-                      quantization_steps: typing.List[QuantizationStep] = None) -> 'BioHash':
+    def transform(self, features: np.ndarray) -> str:
         """
-        Generates a BioHash instance using the provided key data components.
+        Transforms the given feature vector into a raw binary encoded BioHash template string.
 
-        :param token: the token to use during random data generation.
-        :param features: the features to use to generate the hash.
-        :param encoder: an encoder that is used to convert data to binary format.
-        :param quantization_steps: optional list of callables to use for quantization.
-        :return: the BioHash instance.
+        :param features: the feature vector to transform.
+        :return: the raw template string.
         """
-        matrix_generator = random_token.MatrixGenerator(token)
-        token_matrix = matrix_generator.generate(len(features))
-        mixed_data = cls.mix_token_matrix(features, token_matrix)
-        if isinstance(quantization_steps, list):
-            for step in quantization_steps:
-                mixed_data = step(mixed_data)
-        binary_data = encoder.encode(mixed_data)
-        return cls(binary_data)
+        token_matrix = self._matrix_generator.generate(len(features))
+        mixed_data = self.mix_token_matrix(features, token_matrix)
+        step: QuantizationStep
+        for step in self.quantization_steps:
+            mixed_data = step(mixed_data)
+        return self.encoder.encode(mixed_data)
 
     @staticmethod
     def mix_token_matrix(feature_data: np.ndarray, token_matrix: np.ndarray) -> np.ndarray:
@@ -64,3 +59,42 @@ class BioHash:
                 np.inner(feature_data, vector)
             )
         return np.array(mixed_data)
+
+
+class BioHash:
+    """
+    Core BioHash class representing a single hash instance.
+    """
+    def __init__(self, content: str, validation_threshold: float):
+        if validation_threshold < 0 or validation_threshold > 1:
+            raise ValueError('validation_threshold must be between 0 and 1')
+        self.content = content
+        self.validation_threshold = validation_threshold
+
+    @classmethod
+    def generate_hash(cls,
+                      features: np.ndarray,
+                      validation_threshold: float,
+                      pipeline: BioHashPipeline) -> 'BioHash':
+        """
+        Generates a BioHash instance using the provided key data components.
+
+        :param features: the features to use to generate the hash.
+        :param validation_threshold: the threshold to use in the generated BioHash instance.
+        :param pipeline: a BioHashPipeline to use to build the BioHash template string.
+        :return: the BioHash instance.
+        """
+        binary_data = pipeline.transform(features)
+        return cls(binary_data, validation_threshold)
+
+    def __str__(self):
+        return str(self.content)
+
+    def __eq__(self, other):
+        if not isinstance(other, BioHash):
+            return False
+        xor_result = int(str(self), 2) ^ int(str(other), 2)
+        xor_bin = '{0:b}'.format(xor_result)
+        bits_changed = sum([int(bit) for bit in xor_bin])
+        percentage_change = bits_changed / len(str(self))
+        return percentage_change <= self.validation_threshold
