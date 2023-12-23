@@ -1,6 +1,10 @@
+import typing
 import numpy as np
 
 from . import random_token, exceptions, binary_encoding
+
+
+QuantizationStep = typing.Callable[[np.ndarray], np.ndarray]
 
 
 class BioHash:
@@ -14,18 +18,23 @@ class BioHash:
     def generate_hash(cls,
                       token: str,
                       features: np.ndarray,
-                      encoder: binary_encoding.BinaryEncoder) -> 'BioHash':
+                      encoder: binary_encoding.BinaryEncoder,
+                      quantization_steps: typing.List[QuantizationStep] = None) -> 'BioHash':
         """
         Generates a BioHash instance using the provided key data components.
 
         :param token: the token to use during random data generation.
         :param features: the features to use to generate the hash.
         :param encoder: an encoder that is used to convert data to binary format.
+        :param quantization_steps: optional list of callables to use for quantization.
         :return: the BioHash instance.
         """
         matrix_generator = random_token.MatrixGenerator(token)
         token_matrix = matrix_generator.generate(len(features))
         mixed_data = cls.mix_token_matrix(features, token_matrix)
+        if isinstance(quantization_steps, list):
+            for step in quantization_steps:
+                mixed_data = step(mixed_data)
         binary_data = encoder.encode(mixed_data)
         return cls(binary_data)
 
