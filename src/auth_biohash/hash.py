@@ -1,37 +1,22 @@
-import typing
 import numpy as np
+from feature_encoding import base
+from eeg_auth_models_framework import normalization
 
-from . import random_token, exceptions, binary_encoding
+from . import random_token, exceptions
 
 
-QuantizationStep = typing.Callable[[np.ndarray], np.ndarray]
-
-
-class BioHashPipeline:
+class TokenMatrixNormalization(normalization.NormalizationStep):
     """
-    A pipeline used for building BioHash representations of feature data.
+    Specialized normalization step which mixes feature data with an orthogonal matrix generated using a unique random
+    token.
     """
-    def __init__(self,
-                 token: typing.Union[int, float, str],
-                 encoder: binary_encoding.BinaryEncoder,
-                 quantization_steps: typing.List[QuantizationStep] = None):
-        self._matrix_generator = random_token.MatrixGenerator(token)
-        self.encoder = encoder
-        self.quantization_steps = quantization_steps or []
+    def __init__(self, metadata: normalization.FeatureMetaDataIndex, matrix_generator: random_token.MatrixGenerator):
+        super().__init__(metadata)
+        self._matrix_generator = matrix_generator
 
-    def transform(self, features: np.ndarray) -> str:
-        """
-        Transforms the given feature vector into a raw binary encoded BioHash template string.
-
-        :param features: the feature vector to transform.
-        :return: the raw template string.
-        """
-        token_matrix = self._matrix_generator.generate(len(features))
-        mixed_data = self.mix_token_matrix(features, token_matrix)
-        step: QuantizationStep
-        for step in self.quantization_steps:
-            mixed_data = step(mixed_data)
-        return self.encoder.encode(mixed_data)
+    def normalize(self, data: np.ndarray) -> np.ndarray:
+        token_matrix = self._matrix_generator.generate(len(data))
+        return self.mix_token_matrix(data, token_matrix)
 
     @staticmethod
     def mix_token_matrix(feature_data: np.ndarray, token_matrix: np.ndarray) -> np.ndarray:
@@ -75,16 +60,16 @@ class BioHash:
     def generate_hash(cls,
                       features: np.ndarray,
                       validation_threshold: float,
-                      pipeline: BioHashPipeline) -> 'BioHash':
+                      encoder: base.BinaryEncoder) -> 'BioHash':
         """
         Generates a BioHash instance using the provided key data components.
 
         :param features: the features to use to generate the hash.
         :param validation_threshold: the threshold to use in the generated BioHash instance.
-        :param pipeline: a BioHashPipeline to use to build the BioHash template string.
+        :param encoder: a feature encoder to use to encode the feature data into a binary string.
         :return: the BioHash instance.
         """
-        binary_data = pipeline.transform(features)
+        binary_data = encoder.encode(features)
         return cls(binary_data, validation_threshold)
 
     def __str__(self):
