@@ -4,7 +4,3 @@ class BioHashException(Exception):
 
 class CalculationException(BioHashException):
     pass
-
-
-class BinarizationException(BioHashException):
-    pass
