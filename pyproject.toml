@@ -17,6 +17,12 @@ classifiers = [
 ]
 dependencies = [
     "numpy~=1.25.0",
-    "git+https://github.com/CPP-EEG-Authentication-Defense-Project/Feature-Encoding.git@0.0.2",
-    "git+https://github.com/CPP-EEG-Authentication-Defense-Project/Model-Framework.git@0.1.11"
+    "feature_encoding@git+https://github.com/CPP-EEG-Authentication-Defense-Project/Feature-Encoding.git@0.0.2",
+    "eeg_auth_models_framework@git+https://github.com/CPP-EEG-Authentication-Defense-Project/Model-Framework.git@0.1.11"
+]
+
+[project.optional-dependencies]
+dev = [
+    "invoke~=2.2.0",
+    "pip-tools~=7.3.0"
 ]
