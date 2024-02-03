@@ -10,8 +10,10 @@ class TokenMatrixNormalization(normalization.NormalizationStep):
     Specialized normalization step which mixes feature data with an orthogonal matrix generated using a unique random
     token.
     """
-    def __init__(self, metadata: normalization.FeatureMetaDataIndex, matrix_generator: random_token.MatrixGenerator):
-        super().__init__(metadata)
+    metadata_required = False
+
+    def __init__(self, matrix_generator: random_token.MatrixGenerator):
+        super().__init__(metadata=None)
         self._matrix_generator = matrix_generator
 
     def normalize(self, data: np.ndarray) -> np.ndarray:
