@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "auth_biohash"
-version = "0.0.2"
+version = "0.0.21"
 authors = [
     { name="Cristopher Hernandez", email="22552070+CristopherH95@users.noreply.github.com" },
 ]
@@ -18,7 +18,7 @@ classifiers = [
 dependencies = [
     "numpy~=1.25.0",
     "feature_encoding@git+https://github.com/CPP-EEG-Authentication-Defense-Project/Feature-Encoding.git@0.0.2",
-    "eeg_auth_models_framework@git+https://github.com/CPP-EEG-Authentication-Defense-Project/Model-Framework.git@0.1.11"
+    "eeg_auth_models_framework@git+https://github.com/CPP-EEG-Authentication-Defense-Project/Model-Framework.git@0.1.2"
 ]
 
 [project.optional-dependencies]
