@@ -33,7 +33,7 @@ class MatrixGenerator:
         random_source = random.Random(self._token)
         matrix = []
         for _ in range(dimension):
-            basis = np.ndarray([
+            basis = np.array([
                 random_source.randrange(1, sys.maxsize)
                 for _ in range(dimension)
             ])
