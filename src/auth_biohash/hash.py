@@ -1,19 +1,15 @@
 import numpy as np
 from feature_encoding import base
-from eeg_auth_models_framework import normalization
 
 from . import random_token, exceptions
 
 
-class TokenMatrixNormalization(normalization.NormalizationStep):
+class TokenMatrixNormalization:
     """
-    Specialized normalization step which mixes feature data with an orthogonal matrix generated using a unique random
+    Specialized object which mixes feature data with an orthogonal matrix generated using a unique random
     token.
     """
-    metadata_required = False
-
     def __init__(self, matrix_generator: random_token.MatrixGenerator):
-        super().__init__(metadata=None)
         self._matrix_generator = matrix_generator
 
     def normalize(self, data: np.ndarray) -> np.ndarray:
