@@ -1,7 +1,11 @@
 import numpy as np
+import re
 import typing
 
-from . import random_token, normalization, protocols
+from . import random_token, normalization, protocols, exceptions
+
+
+VALID_HASH_PATTERN = re.compile(r'^[01]+$')
 
 
 class BioHash:
@@ -9,6 +13,9 @@ class BioHash:
     Core BioHash class representing a single hash instance.
     """
     def __init__(self, content: str):
+        check = VALID_HASH_PATTERN.match(content)
+        if not check:
+            raise exceptions.InvalidHashException(f'{content} is not a valid BioHash.')
         self.content = content
 
     @classmethod

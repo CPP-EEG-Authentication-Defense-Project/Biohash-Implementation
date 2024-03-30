@@ -4,3 +4,7 @@ class BioHashException(Exception):
 
 class CalculationException(BioHashException):
     pass
+
+
+class InvalidHashException(BioHashException):
+    pass
