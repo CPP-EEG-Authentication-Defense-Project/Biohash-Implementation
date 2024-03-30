@@ -12,6 +12,13 @@ class TokenMatrixNormalization:
         self._matrix_generator = matrix_generator
 
     def normalize(self, data: np.ndarray) -> np.ndarray:
+        """
+        Executes token-matrix normalization on the given data vector. Effectively "mixing" the data vector
+        with a token-seeded random matrix of data.
+
+        :param data: The data to normalize.
+        :return: The normalized data vector.
+        """
         token_matrix = self._matrix_generator.generate(len(data))
         return self.mix_token_matrix(data, token_matrix)
 
