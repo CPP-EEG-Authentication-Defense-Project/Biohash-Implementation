@@ -4,7 +4,7 @@ import random
 import string
 import numpy as np
 
-from auth_biohash import bio_hash, protocols
+from auth_biohash import bio_hash, protocols, exceptions
 
 
 class DummyEncoder(protocols.EncoderProtocol):
@@ -19,6 +19,14 @@ class HashTestCase(unittest.TestCase):
 
         self.assertEqual(str(instance), fake_hash_data)
         self.assertEqual(len(instance), len(fake_hash_data))
+
+    def test_invalid_hash_data(self):
+        fake_hash_data = ''.join(random.choice(string.ascii_lowercase) for _ in range(32))
+
+        def create_instance(data: str):
+            return bio_hash.BioHash(data)
+
+        self.assertRaises(exceptions.InvalidHashException, create_instance, fake_hash_data)
 
     def test_generate_hash(self):
         fake_data = np.ones((4,))
