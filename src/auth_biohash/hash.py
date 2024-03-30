@@ -1,8 +1,7 @@
 import numpy as np
 import typing
-from feature_encoding import base
 
-from . import random_token, normalization
+from . import random_token, normalization, protocols
 
 
 class BioHash:
@@ -16,7 +15,7 @@ class BioHash:
     def generate_hash(cls,
                       features: np.ndarray,
                       token: typing.Union[int, float, str],
-                      encoder: base.BinaryEncoder) -> 'BioHash':
+                      encoder: protocols.EncoderProtocol) -> 'BioHash':
         """
         Generates a BioHash instance using the provided key data components.
 
