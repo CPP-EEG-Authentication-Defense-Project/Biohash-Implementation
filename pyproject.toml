@@ -17,7 +17,7 @@ classifiers = [
 ]
 dependencies = [
     "numpy>=1.20.0",
-    "feature_encoding@git+https://github.com/CPP-EEG-Authentication-Defense-Project/Feature-Encoding.git@0.0.3"
+    "feature_encoding@git+https://github.com/CPP-EEG-Authentication-Defense-Project/Feature-Encoding.git@0.0.32"
 ]
 
 [project.optional-dependencies]
