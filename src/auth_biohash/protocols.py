@@ -8,3 +8,11 @@ class EncoderProtocol(typing.Protocol):
     """
     def encode(self, data: np.ndarray) -> str:
         pass
+
+
+class NormalizationPipelineProtocol(typing.Protocol):
+    """
+    Protocol for normalization pipelines, which can be used with the BioHash interface.
+    """
+    def run(self, data: np.ndarray) -> np.ndarray:
+        pass

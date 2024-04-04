@@ -12,6 +12,17 @@ class DummyEncoder(protocols.EncoderProtocol):
         return ''.join('1' for _ in range(len(data)))
 
 
+class DirectStringEncoder(protocols.EncoderProtocol):
+    def encode(self, data: np.ndarray) -> str:
+        return ''.join(str(int(element)) for element in data)
+
+
+class IncrementNormalizationPipeline(protocols.NormalizationPipelineProtocol):
+    def run(self, data: np.ndarray) -> np.ndarray:
+        doubled_data: np.ndarray = data + 1
+        return doubled_data
+
+
 class HashTestCase(unittest.TestCase):
     def test_hash_instance_builtins(self):
         fake_hash_data = ''.join(random.choice(('0', '1')) for _ in range(32))
@@ -66,3 +77,16 @@ class HashTestCase(unittest.TestCase):
         difference = bio_hash.BioHash.compare(hash_a, hash_b)
 
         self.assertEqual(difference, 0.1)
+
+    def test_additional_normalization(self):
+        fake_data = np.zeros((4,))
+        token = ''.join(random.choice(string.ascii_lowercase) for _ in range(32))
+        encoder = DirectStringEncoder()
+        normalization = IncrementNormalizationPipeline()
+        expected = '1' * 4
+        with unittest.mock.patch('auth_biohash.random_token.MatrixGenerator'):
+            with unittest.mock.patch('auth_biohash.normalization.TokenMatrixNormalization') as FakeNormalization:
+                FakeNormalization.return_value.normalize.return_value = np.zeros((4,))
+                hash_instance = bio_hash.BioHash.generate_hash(fake_data, token, encoder, normalization)
+
+        self.assertEqual(hash_instance.content, expected)
