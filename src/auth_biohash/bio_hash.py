@@ -22,18 +22,22 @@ class BioHash:
     def generate_hash(cls,
                       features: np.ndarray,
                       token: typing.Union[int, float, str],
-                      encoder: protocols.EncoderProtocol) -> 'BioHash':
+                      encoder: protocols.EncoderProtocol,
+                      normalization_pipeline: protocols.NormalizationPipelineProtocol = None) -> 'BioHash':
         """
         Generates a BioHash instance using the provided key data components.
 
         :param features: the features to use to generate the hash.
         :param token: A user-specific token to use during hash generation.
-        :param encoder: a feature encoder to use to encode the feature data into a binary string.
+        :param encoder: A feature encoder to use to encode the feature data into a binary string.
+        :param normalization_pipeline: Additional normalization steps to run against the hash data.
         :return: the BioHash instance.
         """
         matrix_generator = random_token.MatrixGenerator(token)
         normalizer = normalization.TokenMatrixNormalization(matrix_generator)
         normalized_features = normalizer.normalize(features)
+        if normalization_pipeline is not None:
+            normalized_features = normalization_pipeline.run(normalized_features)
         binary_data = encoder.encode(normalized_features)
         return cls(binary_data)
 
