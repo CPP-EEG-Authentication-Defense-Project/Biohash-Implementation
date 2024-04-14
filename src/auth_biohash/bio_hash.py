@@ -1,8 +1,9 @@
+import auth_token_normalization
 import numpy as np
 import re
 import typing
 
-from . import random_token, normalization, protocols, exceptions
+from . import protocols, exceptions
 
 
 VALID_HASH_PATTERN = re.compile(r'^[01]+$')
@@ -33,9 +34,7 @@ class BioHash:
         :param normalization_pipeline: Additional normalization steps to run against the hash data.
         :return: the BioHash instance.
         """
-        matrix_generator = random_token.MatrixGenerator(token)
-        normalizer = normalization.TokenMatrixNormalization(matrix_generator)
-        normalized_features = normalizer.normalize(features)
+        normalized_features = auth_token_normalization.normalize_data(features, token)
         if normalization_pipeline is not None:
             normalized_features = normalization_pipeline.run(normalized_features)
         binary_data = encoder.encode(normalized_features)
