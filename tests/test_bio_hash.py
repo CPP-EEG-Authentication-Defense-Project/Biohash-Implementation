@@ -43,10 +43,9 @@ class HashTestCase(unittest.TestCase):
         fake_data = np.ones((4,))
         token = ''.join(random.choice(string.ascii_lowercase) for _ in range(32))
         encoder = DummyEncoder()
-        with unittest.mock.patch('auth_biohash.random_token.MatrixGenerator'):
-            with unittest.mock.patch('auth_biohash.normalization.TokenMatrixNormalization') as FakeNormalization:
-                FakeNormalization.return_value.normalize.return_value = np.ones((4,))
-                hash_instance = bio_hash.BioHash.generate_hash(fake_data, token, encoder)
+        with unittest.mock.patch('auth_token_normalization.normalize_data') as fake_normalization:
+            fake_normalization.return_value = np.ones((4,))
+            hash_instance = bio_hash.BioHash.generate_hash(fake_data, token, encoder)
 
         self.assertIsInstance(hash_instance, bio_hash.BioHash)
         self.assertEqual(len(hash_instance.content), len(fake_data))
@@ -84,9 +83,8 @@ class HashTestCase(unittest.TestCase):
         encoder = DirectStringEncoder()
         normalization = IncrementNormalizationPipeline()
         expected = '1' * 4
-        with unittest.mock.patch('auth_biohash.random_token.MatrixGenerator'):
-            with unittest.mock.patch('auth_biohash.normalization.TokenMatrixNormalization') as FakeNormalization:
-                FakeNormalization.return_value.normalize.return_value = np.zeros((4,))
-                hash_instance = bio_hash.BioHash.generate_hash(fake_data, token, encoder, normalization)
+        with unittest.mock.patch('auth_token_normalization.normalize_data') as fake_normalization:
+            fake_normalization.return_value = np.zeros((4,))
+            hash_instance = bio_hash.BioHash.generate_hash(fake_data, token, encoder, normalization)
 
         self.assertEqual(hash_instance.content, expected)
