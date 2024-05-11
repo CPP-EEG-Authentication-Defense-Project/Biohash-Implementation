@@ -16,8 +16,7 @@ classifiers = [
     "Operating System :: OS Independent"
 ]
 dependencies = [
-    "numpy>=1.20.0",
-    "auth_token_normalization @ git+https://github.com/CPP-EEG-Authentication-Defense-Project/Token-Normalization.git@0.0.1"
+    "numpy>=1.20.0"
 ]
 
 [project.optional-dependencies]
